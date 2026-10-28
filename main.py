@@ -200,6 +200,7 @@ WORKER_METADATA_FIELDS = {
         "WorkTermsNumber",
         "AssignmentType",
         "WorkerCategory",
+        "JobCode",
         "SourceSystemId",
         "SourceSystemOwner",
     ],
@@ -207,6 +208,7 @@ WORKER_METADATA_FIELDS = {
 
 WORKER_METADATA_SOURCE_COLUMNS = {
     "Title": ("Title",),
+    "JobCode": ("Job Code", "Job ID"),
     "WorkerCategory": ("Worker Category",),
     "FullPartTime": ("Full Part Time", "Full/Part Time"),
     "AssignmentCategory": ("Assignment Category",),
@@ -319,6 +321,36 @@ def prompt_worker_generation_values(input_func=input, defaults=None):
     return values
 
 
+def _source_column_for_field(field_name, normalized_columns, alias_index):
+    preferred_column = PREFERRED_SOURCE_COLUMNS.get(field_name)
+    preferred_columns = [preferred_column] if preferred_column else []
+    if field_name == "EmailAddress":
+        preferred_columns.extend(("Official Email", "Email Address", "Email"))
+    fallback_fields = {
+        "EffectiveStartDate": ("StartDate",),
+        "DateStart": ("StartDate",),
+    }
+
+    for fallback_field in fallback_fields.get(field_name, ()):
+        preferred_columns.extend(
+            column
+            for normalized, column in normalized_columns.items()
+            if alias_index and alias_index.get(normalized) == fallback_field
+        )
+
+    for column in preferred_columns:
+        normalized = normalize_column_name(column)
+        if normalized in normalized_columns:
+            return normalized_columns[normalized]
+
+    matching_columns = [
+        column
+        for normalized, column in normalized_columns.items()
+        if alias_index and alias_index.get(normalized) == field_name
+    ]
+    return matching_columns[0] if len(matching_columns) == 1 else None
+
+
 def _make_mapping_lookup(objects, normalized_columns, alias_index=None):
     lookup = {}
     report = []
@@ -374,24 +406,31 @@ def _make_mapping_lookup(objects, normalized_columns, alias_index=None):
                 and mapping_type not in {"DEFAULT", "CONSTANT", "STATIC"}
                 and normalize_column_name(excel_column) not in normalized_columns
             ):
-                alias_columns = [
-                    column
-                    for normalized, column in normalized_columns.items()
-                    if alias_index and alias_index.get(normalized) == field_name
-                ]
-                preferred_column = PREFERRED_SOURCE_COLUMNS.get(field_name)
-                if preferred_column in alias_columns:
-                    alias_columns = [preferred_column]
-                if len(alias_columns) == 1:
+                source_column = _source_column_for_field(
+                    field_name,
+                    normalized_columns,
+                    alias_index,
+                )
+                if source_column:
                     mapping = {
                         **mapping,
-                        "excel_column": alias_columns[0],
+                        "excel_column": source_column,
                     }
                     mappings_by_field[field_name][-1] = mapping
                 elif (
                     output_fields is not None
                     and field_name not in output_fields
                 ):
+                    mapping = None
+                    mappings_by_field[field_name][-1] = mapping
+                elif not _is_required(next(
+                    (
+                        field.get("required_flag")
+                        for field in obj["fields"]
+                        if field["field_name"] == field_name
+                    ),
+                    0,
+                )):
                     mapping = None
                     mappings_by_field[field_name][-1] = mapping
                 else:
@@ -412,34 +451,15 @@ def _make_mapping_lookup(objects, normalized_columns, alias_index=None):
 
             mapping = matches[0] if matches else None
             if mapping is None:
-                preferred_column = PREFERRED_SOURCE_COLUMNS.get(field_name)
-                normalized_preference = normalize_column_name(
-                    preferred_column
-                ) if preferred_column else None
-                if (
-                    not normalized_preference
-                    or normalized_preference not in normalized_columns
-                ) and alias_index:
-                    matching_columns = [
-                        column
-                        for normalized, column in normalized_columns.items()
-                        if alias_index.get(normalized) == field_name
-                    ]
-                    preferred_column = (
-                        matching_columns[0] if matching_columns else None
-                    )
-                    normalized_preference = normalize_column_name(
-                        preferred_column
-                    ) if preferred_column else None
-                if (
-                    normalized_preference
-                    and normalized_preference in normalized_columns
-                ):
+                source_column = _source_column_for_field(
+                    field_name,
+                    normalized_columns,
+                    alias_index,
+                )
+                if source_column:
                     mapping = {
                         "field_name": field_name,
-                        "excel_column": normalized_columns[
-                            normalized_preference
-                        ],
+                        "excel_column": source_column,
                         "mapping_type": "DIRECT",
                         "required": field.get("required_flag"),
                     }
@@ -660,6 +680,8 @@ def _build_worker_metadata_record(
             "Assignment",
         }:
             value = "ET" if object_name == "WorkTerms" else "E"
+        elif field_name == "JobCode" and object_name == "Assignment":
+            value = source_columns.get(normalize_column_name("JobCode"), "")
         elif field_name in WORKER_METADATA_DEFAULTS:
             value = record.get(field_name, "")
             if is_empty(value):
@@ -916,6 +938,9 @@ def main():
             normalize_column_name(column): value
             for column, value in row.items()
         }
+        source_columns[normalize_column_name("JobCode")] = (
+            canonical_rows[data_index].get("JobCode", "")
+        )
         source_columns["Nationality"] = canonical_rows[data_index].get(
             "Nationality",
             "",

@@ -2,6 +2,28 @@
 from pathlib import Path
 import pandas as pd
 
+from src.field_mapper import DEFAULT_ALIASES, build_alias_index, normalize_column_name
+
+
+def _detect_header_row(path):
+    preview = pd.read_excel(path, header=None, nrows=10)
+    alias_index = build_alias_index(DEFAULT_ALIASES)
+    best_row = 0
+    best_match_count = 0
+
+    for row_index, row in preview.iterrows():
+        matched_fields = {
+            alias_index[normalize_column_name(value)]
+            for value in row
+            if not pd.isna(value)
+            and normalize_column_name(value) in alias_index
+        }
+        if len(matched_fields) > best_match_count:
+            best_row = row_index
+            best_match_count = len(matched_fields)
+
+    return best_row if best_match_count >= 2 else 0
+
 
 def read_excel(file_path):
     """Read an Excel workbook without modifying the original."""
@@ -18,7 +40,7 @@ def read_excel(file_path):
             "Unsupported file type. Please provide an Excel file."
         )
 
-    df = pd.read_excel(path)
+    df = pd.read_excel(path, header=_detect_header_row(path))
 
     # Remove completely empty columns from the DataFrame only.
     df = df.dropna(axis=1, how="all")

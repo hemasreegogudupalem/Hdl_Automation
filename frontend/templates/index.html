@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hdl Automation</title>
+
+  <!-- Inter & JetBrains Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Tactile 3D Stylesheet -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-[#f1f5f9] text-slate-800 min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-600 selection:text-white">
+
+  <!-- Top Navigation Header (3D Elevated) -->
+  <header class="bg-white/95 backdrop-blur-md border-b-2 border-slate-200 sticky top-0 z-40 px-6 py-2.5 flex items-center justify-between shadow-xs">
+    <div class="flex items-center gap-3">
+      <!-- 3D Monogram Brand Icon Badge -->
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-b from-indigo-500 to-indigo-700 border-b-2 border-indigo-900 flex items-center justify-center text-white font-black text-xs shadow-md tracking-wider">
+        HDL
+      </div>
+      <div class="flex items-center gap-2">
+        <h1 class="text-base font-black text-slate-900 tracking-tight leading-none">Hdl Automation</h1>
+        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">Enterprise</span>
+      </div>
+    </div>
+
+    <!-- Right Side Status Indicators -->
+    <div class="flex items-center gap-2.5">
+      <!-- MySQL Status Badge -->
+      <div class="flex items-center gap-2 bg-emerald-50/90 border border-emerald-300 border-b-2 border-b-emerald-400 px-3 py-1.5 rounded-lg text-xs shadow-2xs">
+        <span id="mysql-status-badge" class="w-2 h-2 rounded-full bg-emerald-500 live-dot inline-block"></span>
+        <span id="mysql-status-text" class="text-emerald-950 font-mono text-[11px] font-semibold">Connecting to MySQL...</span>
+        <button id="btn-test-db" title="Ping MySQL Connection" class="ml-1 text-emerald-700 hover:text-emerald-950 p-0.5 rounded transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        </button>
+      </div>
+
+      <!-- Active Client Badge -->
+      <div class="hidden md:flex items-center gap-1.5 bg-blue-50 border border-blue-200 border-b-2 border-b-blue-300 px-3 py-1.5 rounded-lg text-xs text-blue-900 shadow-2xs font-semibold">
+        <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+        <span id="client-badge-text">Client: Loading...</span>
+      </div>
+
+      <!-- Backend Integrity Badge -->
+      <div class="hidden lg:flex items-center gap-1.5 text-xs text-violet-900 border border-violet-200 border-b-2 border-b-violet-300 bg-violet-50 px-3 py-1.5 rounded-lg font-bold shadow-2xs">
+        <span class="w-2 h-2 rounded-full bg-violet-600"></span>
+        <span>Backend Intact</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body Layout -->
+  <div class="flex-1 flex overflow-hidden">
+    <!-- Left Navigation Sidebar -->
+    <aside class="w-64 border-r border-slate-200 bg-white flex flex-col justify-between p-3.5 shrink-0 shadow-xs">
+      <div class="space-y-5">
+        <div>
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-2.5">Modules</div>
+          <nav class="space-y-1.5">
+
+            <!-- 1. Upload Excel Tab -->
+            <button data-tab="upload" class="nav-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all border bg-emerald-50 text-emerald-900 border-emerald-300 border-b-2 border-b-emerald-400 shadow-xs">
+              <div class="flex items-center gap-2.5">
+                <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shadow-2xs">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                </span>
+                <span>Upload Excel</span>
+              </div>
+              <span class="tab-active-dot w-2 h-2 rounded-full bg-emerald-500 shadow-xs"></span>
+            </button>
+
+            <!-- 2. HDL Generator Tab -->
+            <button data-tab="generator" class="nav-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all border border-transparent text-slate-600 hover:text-indigo-900 hover:bg-slate-50">
+              <div class="flex items-center gap-2.5">
+                <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </span>
+                <span>HDL Generator</span>
+              </div>
+            </button>
+
+            <!-- 3. Mappings Tab -->
+            <button data-tab="mappings" class="nav-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all border border-transparent text-slate-600 hover:text-amber-900 hover:bg-slate-50">
+              <div class="flex items-center gap-2.5">
+                <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg>
+                </span>
+                <span>Mappings</span>
+              </div>
+            </button>
+
+            <!-- 4. Outputs Tab -->
+            <button data-tab="outputs" class="nav-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all border border-transparent text-slate-600 hover:text-violet-900 hover:bg-slate-50">
+              <div class="flex items-center gap-2.5">
+                <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </span>
+                <span>Outputs</span>
+              </div>
+            </button>
+
+            <!-- 5. Database Schema Tab -->
+            <button data-tab="database" class="nav-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all border border-transparent text-slate-600 hover:text-teal-900 hover:bg-slate-50">
+              <div class="flex items-center gap-2.5">
+                <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                </span>
+                <span>Database Schema</span>
+              </div>
+            </button>
+
+          </nav>
+        </div>
+
+        <!-- Active Context Card (3D Inset Well) -->
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 border-b-2 border-b-slate-300 space-y-2 shadow-2xs">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+            <span>Active Selection</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500 live-dot"></span>
+          </div>
+          <div class="text-xs">
+            <span class="text-slate-500 text-[11px] block font-medium">Source Sheet:</span>
+            <div id="current-file-badge" class="font-mono text-emerald-900 truncate font-bold text-xs bg-emerald-100/80 px-2 py-0.5 rounded-md mt-0.5 border border-emerald-300">
+              saudi_employee_data.xlsx
+            </div>
+          </div>
+          <div class="text-xs">
+            <span class="text-slate-500 text-[11px] block font-medium">Target Template:</span>
+            <div id="current-template-badge" class="font-mono text-indigo-900 truncate font-bold text-xs bg-indigo-100/80 px-2 py-0.5 rounded-md mt-0.5 border border-indigo-300">
+              Worker.dat (10 Objects)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="pt-3 border-t border-slate-100 text-[10px] text-slate-400 flex items-center justify-between px-1">
+        <div>Backend: <span class="text-emerald-700 font-bold">Unmodified</span></div>
+        <div class="text-slate-400 font-mono">v2.0</div>
+      </div>
+    </aside>
+
+    <!-- Main Content Canvas -->
+    <main class="flex-1 overflow-y-auto p-5 lg:p-6 scroll-light">
+
+      <!-- ================= 1. TAB: UPLOAD EXCEL ================= -->
+      <div id="view-upload" class="tab-view max-w-6xl mx-auto space-y-5">
+
+        <!-- Drag & Drop Upload Zone (3D Elevated) -->
+        <div class="card-3d p-5 space-y-4">
+          <div id="file-dropzone" class="well-3d p-7 text-center cursor-pointer">
+            <input type="file" id="excel-file-input" accept=".xlsx,.xls" class="hidden">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-600 border-b-2 border-emerald-800 text-white flex items-center justify-center mx-auto mb-2 shadow-md">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            </div>
+            <h3 class="text-xs font-bold text-slate-900">Drag and drop any new Excel file here</h3>
+            <p class="text-[11px] text-slate-500 mt-0.5">Supports Microsoft Excel .xlsx and .xls formats</p>
+            <button type="button" class="btn-3d-secondary mt-3 px-4 py-1.5 text-xs font-bold">
+              Choose File from Computer
+            </button>
+          </div>
+
+          <!-- Existing Workbooks List in input/ -->
+          <div class="pt-1 space-y-2">
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+              <span>Available Workbooks in input/</span>
+              <span class="text-[10px] text-slate-400 font-normal">Click any card to select</span>
+            </div>
+            <div id="input-files-list" class="space-y-2">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Spreadsheet Data Inspector (3D Elevated) -->
+        <div class="card-3d p-5 space-y-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-black text-slate-900">Workbook Data Inspector</h3>
+              <span id="grid-filename-badge" class="px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 font-mono text-xs border border-emerald-200 font-bold shadow-2xs">
+                Loading...
+              </span>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-wrap items-center gap-2">
+              <span id="grid-total-rows-badge" class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-800 font-bold text-xs border border-blue-200 shadow-2xs">0 Rows</span>
+              <span id="grid-total-cols-badge" class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 font-bold text-xs border border-emerald-200 shadow-2xs">0 Columns</span>
+
+              <select id="grid-pagesize-select" class="px-2.5 py-1 rounded-md border border-slate-300 bg-white text-xs font-semibold text-slate-700 shadow-2xs focus:outline-none focus:border-indigo-500">
+                <option value="15">15 rows / page</option>
+                <option value="25">25 rows / page</option>
+                <option value="50">50 rows / page</option>
+                <option value="100">100 rows / page</option>
+              </select>
+
+              <div class="relative w-52">
+                <input type="text" id="grid-search-input" placeholder="Search sheet cells..." class="input-3d w-full px-2.5 py-1 text-xs text-slate-800 placeholder-slate-400">
+              </div>
+            </div>
+          </div>
+
+          <!-- Spreadsheet Table -->
+          <div class="overflow-x-auto rounded-xl border border-slate-200 max-h-[460px] shadow-inner bg-white">
+            <table class="w-full text-left border-collapse data-table text-xs">
+              <thead id="grid-table-head">
+                <!-- Dynamic headers -->
+              </thead>
+              <tbody id="grid-table-body" class="divide-y divide-slate-100">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Footer -->
+          <div class="flex items-center justify-between text-xs text-slate-500 pt-1">
+            <span id="grid-page-indicator">Page 1 of 1</span>
+            <div class="flex items-center gap-1.5">
+              <button id="grid-first-btn" class="btn-3d-secondary px-2.5 py-1 text-xs">First</button>
+              <button id="grid-prev-btn" class="btn-3d-secondary px-2.5 py-1 text-xs">Previous</button>
+              <button id="grid-next-btn" class="btn-3d-secondary px-2.5 py-1 text-xs">Next</button>
+              <button id="grid-last-btn" class="btn-3d-secondary px-2.5 py-1 text-xs">Last</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= 2. TAB: HDL GENERATOR ================= -->
+      <div id="view-generator" class="tab-view max-w-6xl mx-auto space-y-5 hidden">
+
+        <!-- 1. Select Target Template (3D Elevated) -->
+        <div class="card-3d p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+              <span>1. Target Template</span>
+            </h3>
+            <span class="text-[11px] text-slate-400 font-medium">Synchronized from MySQL</span>
+          </div>
+          <div id="template-cards-container" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- 2. Generation Parameters (3D Elevated) -->
+        <div class="card-3d p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+              <span>2. HDL Parameters</span>
+            </h3>
+            <button id="btn-autodetect" class="btn-3d-secondary px-3 py-1 text-xs text-indigo-700 flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              <span>Auto-Detect Parameters</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+            <!-- Legislation Code -->
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 border-b-2 border-b-slate-300 space-y-1.5 shadow-2xs">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-bold text-slate-800">Legislation Code</label>
+                <span id="badge-detected-legislation" class="text-[10px] bg-sky-100 text-sky-800 border border-sky-300 px-1.5 py-0.2 rounded font-mono font-bold">SAU</span>
+              </div>
+              <input type="text" id="input-legislation-code" placeholder="e.g. SAU or IND" class="input-3d w-full px-2.5 py-1.5 text-xs font-mono text-slate-900 font-semibold">
+              <p class="text-[10px] text-slate-500">ISO legislation code (e.g. SAU, IND, USA).</p>
+            </div>
+
+            <!-- Legal Employer Name -->
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 border-b-2 border-b-slate-300 space-y-1.5 shadow-2xs">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-bold text-slate-800">Legal Employer Name</label>
+                <span id="badge-detected-employer" class="text-[10px] bg-indigo-100 text-indigo-800 border border-indigo-300 px-1.5 py-0.2 rounded font-mono font-bold">MIS LE</span>
+              </div>
+              <input type="text" id="input-legal-employer" placeholder="e.g. MIS LE" class="input-3d w-full px-2.5 py-1.5 text-xs text-slate-900 font-semibold">
+              <p class="text-[10px] text-slate-500">Legal Employer entity name.</p>
+            </div>
+
+            <!-- Source System Owner -->
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 border-b-2 border-b-slate-300 space-y-1.5 shadow-2xs">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-bold text-slate-800">Source System Owner</label>
+                <span id="badge-detected-owner" class="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300 px-1.5 py-0.2 rounded font-mono font-bold">GRISMO</span>
+              </div>
+              <input type="text" id="input-source-owner" placeholder="e.g. GRISMO" class="input-3d w-full px-2.5 py-1.5 text-xs font-mono text-slate-900 font-semibold">
+              <p class="text-[10px] text-slate-500">Identifier owner in MySQL clients.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Generation Trigger (3D Elevated) -->
+        <div class="card-3d p-6 text-center space-y-3.5">
+          <h3 id="gen-target-heading" class="text-base font-black text-slate-900">Ready to Generate Worker.dat</h3>
+          <p class="text-xs text-slate-600 max-w-lg mx-auto">
+            Transforms input spreadsheet records into <span id="gen-target-datname" class="font-bold text-indigo-700">Worker.dat</span> along with mapping and validation audit logs.
+          </p>
+          <div class="pt-1">
+            <button id="btn-execute-generate" class="btn-3d-primary px-8 py-3 text-xs tracking-wide">
+              Execute Transformation & Generate HDL Bundle
+            </button>
+          </div>
+
+          <!-- Progress bar -->
+          <div id="generation-progress-box" class="hidden space-y-1.5 max-w-md mx-auto pt-2">
+            <div class="flex justify-between text-xs text-slate-600 font-medium">
+              <span id="generation-progress-text">Executing generation pipeline...</span>
+              <span class="text-indigo-600 font-semibold">In Progress</span>
+            </div>
+            <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden border border-slate-200 shadow-inner">
+              <div id="generation-progress-bar" class="h-full bg-gradient-to-r from-indigo-600 to-blue-600 transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Results Summary Card (After Generation - 3D KPI Metrics) -->
+          <div id="generation-results-card" class="hidden space-y-4 pt-4 text-left">
+            <!-- 5 Tactile 3D KPI Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <div class="kpi-3d p-3.5 border-l-4 border-l-sky-500">
+                <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Excel Rows</div>
+                <div id="res-stat-read" class="text-xl font-black text-slate-900 mt-0.5">0</div>
+              </div>
+              <div class="kpi-3d p-3.5 border-l-4 border-l-emerald-500">
+                <div class="text-[10px] text-emerald-800 font-bold uppercase tracking-wider">Generated Rows</div>
+                <div id="res-stat-generated" class="text-xl font-black text-emerald-700 mt-0.5">0</div>
+              </div>
+              <div class="kpi-3d p-3.5 border-l-4 border-l-amber-500">
+                <div class="text-[10px] text-amber-800 font-bold uppercase tracking-wider">Skipped Rows</div>
+                <div id="res-stat-skipped" class="text-xl font-black text-amber-700 mt-0.5">0</div>
+              </div>
+              <div class="kpi-3d p-3.5 border-l-4 border-l-rose-500">
+                <div class="text-[10px] text-rose-800 font-bold uppercase tracking-wider">Validation Errors</div>
+                <div id="res-stat-errors" class="text-xl font-black text-rose-700 mt-0.5">0</div>
+              </div>
+              <div class="kpi-3d p-3.5 border-l-4 border-l-violet-500">
+                <div class="text-[10px] text-violet-800 font-bold uppercase tracking-wider">File Size</div>
+                <div id="res-stat-filesize" class="text-xl font-black text-violet-700 mt-0.5">0 KB</div>
+              </div>
+            </div>
+
+            <!-- Action Prompt -->
+            <div class="p-4 rounded-xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 text-white flex flex-wrap items-center justify-between gap-3 shadow-lg">
+              <div>
+                <div class="text-xs font-bold text-white">Transformation Completed Successfully</div>
+                <div class="text-[11px] text-slate-400">All data records and audit logs are ready in the Dark Theme Output Station.</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="switchTab('outputs')" class="btn-dark-glow">
+                  <span>View Full Data in Output Station</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+                <button id="btn-quick-download-dat" class="btn-dark-glass">
+                  Download DAT
+                </button>
+              </div>
+            </div>
+
+            <!-- Inline Validation Errors Table -->
+            <div id="validation-errors-inline-card" class="hidden space-y-1.5">
+              <div class="text-[11px] font-bold text-rose-700 uppercase tracking-wider">Validation Issues Found in Source Data</div>
+              <div class="overflow-x-auto rounded-lg border border-rose-200 max-h-48 bg-white shadow-inner">
+                <table class="w-full text-left border-collapse data-table text-xs">
+                  <thead class="bg-rose-50 text-rose-800 border-b border-rose-200">
+                    <tr>
+                      <th class="py-1.5 px-3 font-semibold w-16">Row #</th>
+                      <th class="py-1.5 px-3 font-semibold">Object</th>
+                      <th class="py-1.5 px-3 font-semibold">Field</th>
+                      <th class="py-1.5 px-3 font-semibold">Error Description</th>
+                    </tr>
+                  </thead>
+                  <tbody id="validation-errors-table-body" class="divide-y divide-slate-100">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= 3. TAB: MAPPINGS ================= -->
+      <div id="view-mappings" class="tab-view max-w-6xl mx-auto space-y-4 hidden">
+        <div class="card-3d p-5 space-y-4">
+          <!-- Top Toolbar with Context & Summary Stats -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+            <div>
+              <h2 class="text-sm font-black text-slate-900">Field Mappings</h2>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Template: <span id="map-target-template" class="font-bold text-indigo-700">Worker</span> • Source: <span id="map-target-file" class="font-bold text-slate-800 font-mono">saudi_employee_data.xlsx</span>
+              </p>
+            </div>
+
+            <!-- Summary Badges -->
+            <div class="flex items-center gap-2 text-xs shrink-0">
+              <div class="px-3 py-1 rounded-md bg-slate-50 border border-slate-200 border-b-2 border-b-slate-300 shadow-2xs font-semibold">
+                <span class="text-slate-500">Total:</span> <span id="map-stat-total" class="font-black text-slate-900 ml-1">0</span>
+              </div>
+              <div class="px-3 py-1 rounded-md bg-emerald-50 border border-emerald-300 border-b-2 border-b-emerald-400 text-emerald-800 font-bold shadow-2xs">
+                <span>Mapped:</span> <span id="map-stat-mapped" class="ml-1">0</span>
+              </div>
+              <div class="px-3 py-1 rounded-md bg-rose-50 border border-rose-300 border-b-2 border-b-rose-400 text-rose-800 font-bold shadow-2xs">
+                <span>Unmapped:</span> <span id="map-stat-unmapped" class="ml-1">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter Pills & Search -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+              <button data-filter="all" class="mapping-filter-btn px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-2xs transition-all">All Fields</button>
+              <button data-filter="mapped" class="mapping-filter-btn btn-3d-secondary px-3 py-1 rounded-lg text-xs font-medium">Mapped Only</button>
+              <button data-filter="unmapped" class="mapping-filter-btn btn-3d-secondary px-3 py-1 rounded-lg text-xs font-medium">Unmapped Only</button>
+              <button data-filter="direct" class="mapping-filter-btn btn-3d-secondary px-3 py-1 rounded-lg text-xs font-medium">Direct</button>
+              <button data-filter="generated" class="mapping-filter-btn btn-3d-secondary px-3 py-1 rounded-lg text-xs font-medium">Generated</button>
+              <button data-filter="default" class="mapping-filter-btn btn-3d-secondary px-3 py-1 rounded-lg text-xs font-medium">Default</button>
+            </div>
+            <div class="relative w-56">
+              <input type="text" id="mappings-search-input" placeholder="Search fields..." class="input-3d w-full px-2.5 py-1 text-xs text-slate-800 placeholder-slate-400">
+            </div>
+          </div>
+
+          <!-- Mappings Table -->
+          <div class="overflow-x-auto rounded-xl border border-slate-200 max-h-[550px] shadow-inner bg-white">
+            <table class="w-full text-left border-collapse data-table text-xs">
+              <thead>
+                <tr>
+                  <th class="py-2.5 px-3">Object Name</th>
+                  <th class="py-2.5 px-3">Target Field Name</th>
+                  <th class="py-2.5 px-3">Source Excel Column</th>
+                  <th class="py-2.5 px-3">Mapping Type</th>
+                  <th class="py-2.5 px-3">Default Value</th>
+                  <th class="py-2.5 px-3">Status</th>
+                </tr>
+              </thead>
+              <tbody id="mappings-table-body" class="divide-y divide-slate-100">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 4. TAB: OUTPUTS (DARK THEME WORKSTATION, ALL DATA VISIBLE) ================= -->
+      <div id="view-outputs" class="tab-view max-w-7xl mx-auto space-y-4 hidden">
+
+        <!-- Dark Theme 3D Terminal Workstation -->
+        <div class="dark-terminal-station">
+
+          <!-- Terminal Station Top Bar (macOS Window Chrome + Deliverable Selector Tabs) -->
+          <div class="dark-terminal-header">
+            <div class="flex items-center gap-3">
+              <!-- Window Chrome Dots -->
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-xs"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-xs"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs"></span>
+              </div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider hidden sm:inline-block">Deliverables:</div>
+              <!-- Deliverable Selector Tabs -->
+              <div id="outputs-file-selector" class="flex items-center gap-1.5 flex-wrap">
+                <!-- Dynamically populated dark tabs -->
+              </div>
+            </div>
+
+            <!-- Refresh Button -->
+            <button onclick="loadOutputFiles()" class="btn-dark-glass shrink-0">
+              <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              <span>Refresh</span>
+            </button>
+          </div>
+
+          <!-- Active File Toolbar (Inspector Sub-bar) -->
+          <div class="bg-[#0b101d] border-b border-slate-800/80 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <span id="active-file-badge" class="px-2 py-0.5 rounded bg-indigo-950 text-indigo-400 font-bold font-mono text-[10px] border border-indigo-800">
+                DAT
+              </span>
+              <div>
+                <span id="active-file-title" class="text-xs font-bold text-white font-mono">Worker.dat</span>
+                <span id="active-file-subtitle" class="text-[11px] text-slate-400 ml-2">Loading details...</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons: Download & Copy to Clipboard -->
+            <div class="flex items-center gap-2">
+              <button id="btn-copy-active-file" class="btn-dark-glass">
+                <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10a2 2 0 00-2 2v3a2 2 0 002 2h10a2 2 0 002-2v-3a2 2 0 00-2-2z"></path></svg>
+                <span id="btn-copy-text">Copy All to Clipboard</span>
+              </button>
+              <a id="btn-download-active-file" href="#" class="btn-dark-glow">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span>Download File</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Visible Data Container (Code viewer for DAT, Dark Table viewer for CSV/Excel) -->
+          <div id="output-data-viewer" class="max-h-[620px] overflow-y-auto bg-[#090d16]">
+            <!-- Content rendered dynamically -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= 5. TAB: DATABASE SCHEMA ================= -->
+      <div id="view-database" class="tab-view max-w-6xl mx-auto space-y-4 hidden">
+        <div class="card-3d p-5 space-y-4">
+          <!-- Top Bar -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+            <div>
+              <h2 class="text-sm font-black text-slate-900">Database Schema</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Live inspection of templates, objects, and attributes configured in MySQL.</p>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <select id="db-template-select" class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-700 shadow-2xs focus:outline-none focus:border-teal-500">
+                <!-- Dynamically populated -->
+              </select>
+              <button onclick="loadDatabaseSchema()" class="btn-3d-secondary px-3 py-1.5 text-xs font-bold">
+                Refresh Schema
+              </button>
+            </div>
+          </div>
+
+          <div id="db-schema-container" class="space-y-3">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Frontend Logic -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -248,7 +248,8 @@ class WorkerGenerationRulesTests(unittest.TestCase):
             "BusinessUnitShortCode", "PrimaryFlag", "PrimaryAssignmentFlag",
             "AssignmentCategory", "DepartmentName", "FullPartTime",
             "LocationCode", "WorkTermsNumber", "AssignmentType",
-            "WorkerCategory", "SourceSystemId", "SourceSystemOwner",
+            "WorkerCategory", "JobCode", "SourceSystemId",
+            "SourceSystemOwner",
         ])
 
     def test_expands_parent_source_ids_and_metadata_defaults(self):
@@ -257,12 +258,13 @@ class WorkerGenerationRulesTests(unittest.TestCase):
             {
                 "AssignmentNumber": "ASG_SAEMP1001",
                 "AssignmentStatusType": "ACTIVE",
+                "JobCode": "JOB_1001",
                 "SourceSystemId": "Assignment_SAEMP1001",
                 "SourceSystemOwner": "GRISMO",
             },
             "SAEMP1001",
             "GRISMO",
-            {},
+            {"jobcode": "JOB_1001"},
             generation_values={
                 "legislation_code": "SAU",
                 "legal_employer_name": "Example Employer",
@@ -287,7 +289,27 @@ class WorkerGenerationRulesTests(unittest.TestCase):
         self.assertEqual(record["EffectiveSequence"], "1")
         self.assertEqual(record["EffectiveLatestChange"], "Y")
         self.assertEqual(record["PrimaryAssignmentFlag"], "Y")
+        self.assertEqual(record["JobCode"], "JOB_1001")
         self.assertEqual(record["SourceSystemOwner"], "EXAMPLE_OWNER")
+
+    def test_assignment_job_code_uses_excel_header_or_stays_blank(self):
+        from_excel = _build_worker_metadata_record(
+            "Assignment",
+            {"JobCode": "STATIC_JOB_CODE"},
+            "SAEMP1001",
+            "GRISMO",
+            {"jobcode": "JOB_FROM_EXCEL"},
+        )
+        without_excel_column = _build_worker_metadata_record(
+            "Assignment",
+            {"JobCode": "STATIC_JOB_CODE"},
+            "SAEMP1001",
+            "GRISMO",
+            {},
+        )
+
+        self.assertEqual(from_excel["JobCode"], "JOB_FROM_EXCEL")
+        self.assertEqual(without_excel_column["JobCode"], "")
 
     def test_generates_work_terms_and_assignment_numbers_without_underscores(self):
         work_terms = _build_worker_metadata_record(
@@ -397,6 +419,204 @@ class WorkerGenerationRulesTests(unittest.TestCase):
             lookup[("PersonEmail", "EmailAddress")]["excel_column"],
             "EmailAddress",
         )
+
+    def test_prefers_generic_email_alias_before_personal_email_fallback(self):
+        columns = {
+            normalize_column_name(column): column
+            for column in ("Email *", "Personal Email")
+        }
+        objects = [{
+            "object_name": "PersonEmail",
+            "mappings": [{
+                "field_name": "EmailAddress",
+                "excel_column": "Work Email",
+                "mapping_type": "DIRECT",
+            }],
+            "fields": [{
+                "field_name": "EmailAddress",
+                "required_flag": 1,
+            }],
+        }]
+        alias_index = build_alias_index(load_field_mappings())
+
+        lookup, _ = _make_mapping_lookup(objects, columns, alias_index)
+        entries = _email_entries(
+            {"Email *": "work@example.test", "Personal Email": "home@example.test"},
+            columns,
+            alias_index,
+        )
+
+        self.assertEqual(
+            lookup[("PersonEmail", "EmailAddress")]["excel_column"],
+            "Email *",
+        )
+        self.assertEqual(
+            [entry["EmailType"] for entry in entries],
+            ["W1", "H1"],
+        )
+
+    def test_maps_bulk_aadhaar_address_to_address_line_one(self):
+        column = "Address as in Aadhaar card"
+        objects = [{
+            "object_name": "PersonAddress",
+            "mappings": [{
+                "field_name": "AddressLine1",
+                "excel_column": "Home Address",
+                "mapping_type": "DIRECT",
+            }],
+            "fields": [{
+                "field_name": "AddressLine1",
+                "required_flag": 1,
+            }],
+        }]
+
+        lookup, _ = _make_mapping_lookup(
+            objects,
+            {normalize_column_name(column): column},
+            build_alias_index(load_field_mappings()),
+        )
+
+        self.assertEqual(
+            lookup[("PersonAddress", "AddressLine1")]["excel_column"],
+            column,
+        )
+
+    def test_maps_required_effective_start_date_from_bulk_date_joined_header(self):
+        column = "Date Joined *"
+        objects = [{
+            "object_name": "Worker",
+            "mappings": [],
+            "fields": [{
+                "field_name": "EffectiveStartDate",
+                "required_flag": 1,
+            }],
+        }]
+
+        lookup, _ = _make_mapping_lookup(
+            objects,
+            {normalize_column_name(column): column},
+            build_alias_index(load_field_mappings()),
+        )
+
+        self.assertEqual(
+            lookup[("Worker", "EffectiveStartDate")]["excel_column"],
+            column,
+        )
+
+    def test_maps_required_work_relationship_date_start_from_bulk_date_joined(self):
+        column = "Date Joined *"
+        objects = [{
+            "object_name": "WorkRelationship",
+            "mappings": [],
+            "fields": [{
+                "field_name": "DateStart",
+                "required_flag": 1,
+            }],
+        }]
+
+        lookup, _ = _make_mapping_lookup(
+            objects,
+            {normalize_column_name(column): column},
+            build_alias_index(load_field_mappings()),
+        )
+
+        self.assertEqual(
+            lookup[("WorkRelationship", "DateStart")]["excel_column"],
+            column,
+        )
+
+    def test_maps_required_worker_type_from_bulk_worktype_header(self):
+        column = "WorkType"
+        objects = [{
+            "object_name": "WorkRelationship",
+            "mappings": [],
+            "fields": [{
+                "field_name": "WorkerType",
+                "required_flag": 1,
+            }],
+        }]
+
+        lookup, _ = _make_mapping_lookup(
+            objects,
+            {normalize_column_name(column): column},
+            build_alias_index(load_field_mappings()),
+        )
+
+        self.assertEqual(
+            lookup[("WorkRelationship", "WorkerType")]["excel_column"],
+            column,
+        )
+
+    def test_prefers_start_date_for_effective_start_date_when_both_exist(self):
+        columns = {
+            normalize_column_name(column): column
+            for column in ("Start Date", "Date Joined *")
+        }
+        objects = [{
+            "object_name": "Worker",
+            "mappings": [],
+            "fields": [{
+                "field_name": "EffectiveStartDate",
+                "required_flag": 1,
+            }],
+        }]
+
+        lookup, _ = _make_mapping_lookup(
+            objects,
+            columns,
+            build_alias_index(load_field_mappings()),
+        )
+
+        self.assertEqual(
+            lookup[("Worker", "EffectiveStartDate")]["excel_column"],
+            "Start Date",
+        )
+
+    def test_allows_missing_optional_database_mapping_column(self):
+        objects = [{
+            "object_name": "PersonName",
+            "mappings": [{
+                "field_name": "MiddleNames",
+                "excel_column": "Middle Names",
+                "mapping_type": "DIRECT",
+            }],
+            "fields": [{
+                "field_name": "MiddleNames",
+                "required_flag": 0,
+            }],
+        }]
+
+        lookup, _ = _make_mapping_lookup(
+            objects,
+            {normalize_column_name("First Name *"): "First Name *"},
+            build_alias_index(load_field_mappings()),
+        )
+
+        self.assertIsNone(lookup[("PersonName", "MiddleNames")])
+
+    def test_still_rejects_missing_required_database_mapping_column(self):
+        objects = [{
+            "object_name": "PersonName",
+            "mappings": [{
+                "field_name": "FirstName",
+                "excel_column": "First Name",
+                "mapping_type": "DIRECT",
+            }],
+            "fields": [{
+                "field_name": "FirstName",
+                "required_flag": 1,
+            }],
+        }]
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "Database mapping for PersonName.FirstName expects Excel column",
+        ):
+            _make_mapping_lookup(
+                objects,
+                {normalize_column_name("Last Name"): "Last Name"},
+                build_alias_index(load_field_mappings()),
+            )
 
     def test_ignores_required_database_fields_not_in_worker_hdl_layout(self):
         objects = [{

@@ -24,7 +24,9 @@ DEFAULT_ALIASES = {
     ],
     "Sex": ["sex", "gender"],
     "MaritalStatus": ["marital status", "marital"],
-    "EmailAddress": ["email", "email address", "work email", "official email"],
+    "EmailAddress": [
+        "email", "email address", "work email", "official email",
+    ],
     "EmailType": ["email type"],
     "DateTo": ["date to", "email end date"],
     "PhoneNumber": ["phone", "phone number", "mobile", "mobile number"],
@@ -38,7 +40,10 @@ DEFAULT_ALIASES = {
     "LocationName": ["location", "location name", "work location"],
     "AssignmentNumber": ["assignment number", "assignment id"],
     "AssignmentStatusType": ["assignment status", "employment status"],
-    "WorkerType": ["worker type", "employee type", "employment type"],
+    "WorkerType": [
+        "worker type", "work type", "worktype",
+        "employee type", "employment type",
+    ],
     "LegislationCode": ["legislation code", "legislation"],
     "LegalEntity": ["legal entity", "legal entity name"],
     "Nationality": ["nationality", "citizenship"],

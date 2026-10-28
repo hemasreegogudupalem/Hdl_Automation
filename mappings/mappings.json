@@ -40,7 +40,8 @@
   "EmailAddress": [
     "Personal Email",
     "Work Email",
-    "Email Address"
+    "Email Address",
+    "Email"
   ],
   "EmailType": [
     "Email Type"
@@ -54,7 +55,9 @@
   ],
   "WorkerType": [
     "Worker Type",
-    "Worker Category"
+    "Worker Category",
+    "WorkType",
+    "Work Type"
   ],
   "LegislationCode": [
     "Legislation Code"
@@ -97,7 +100,8 @@
   ],
   "AddressLine1": [
     "Home Address",
-    "Address"
+    "Address",
+    "Address as in Aadhaar card"
   ],
   "FatherName": [
     "Father Name"

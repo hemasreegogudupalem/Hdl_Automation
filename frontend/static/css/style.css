@@ -1,0 +1,489 @@
+/* Oracle Fusion Cloud HCM - HDL Automation Stylesheet
+   Tactile 3D Enterprise Edition with Dark Theme Output Station
+   Strictly Zero Backend Modification
+*/
+
+:root {
+  --bg-main: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f8fafc;
+
+  --border-subtle: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --border-dark: #94a3b8;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+
+  /* Executive Brand Colors */
+  --c-indigo: #4f46e5;
+  --c-indigo-dark: #3730a3;
+  --c-emerald: #059669;
+  --c-emerald-dark: #047857;
+  --c-amber: #d97706;
+  --c-rose: #e11d48;
+  --c-sky: #0284c7;
+  --c-teal: #0d9488;
+  --c-violet: #7c3aed;
+}
+
+body {
+  background-color: #f1f5f9;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.04) 0px, transparent 40%),
+    radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.04) 0px, transparent 40%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Sleek Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Light scrollbar for main canvas */
+.scroll-light::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.scroll-light::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+.scroll-light::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ==========================================================================
+   3D TACTILE CARDS & SURFACES
+   ========================================================================== */
+
+.card-3d {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-bottom: 3px solid #cbd5e1;
+  border-radius: 14px;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.04),
+    0 6px 16px -2px rgba(15, 23, 42, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.card-3d:hover {
+  border-bottom-color: #94a3b8;
+  transform: translateY(-2px);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.04),
+    0 12px 24px -4px rgba(15, 23, 42, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+/* Inset Well (Dropzone, Inputs) */
+.well-3d {
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s ease;
+}
+
+.well-3d:hover {
+  border-color: #6366f1;
+  background: #fcfdff;
+  box-shadow: inset 0 2px 6px rgba(99, 102, 241, 0.06), 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* 3D Inputs */
+.input-3d {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-bottom: 2px solid #94a3b8;
+  border-radius: 8px;
+  box-shadow: inset 0 1.5px 3px rgba(15, 23, 42, 0.04);
+  transition: all 0.15s ease;
+}
+
+.input-3d:focus {
+  outline: none;
+  border-color: #4f46e5;
+  border-bottom-color: #3730a3;
+  box-shadow: inset 0 1.5px 3px rgba(15, 23, 42, 0.04), 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* ==========================================================================
+   3D TACTILE BUTTONS
+   ========================================================================== */
+
+.btn-3d-primary {
+  background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
+  border: 1px solid #3730a3;
+  border-bottom: 3.5px solid #312e81;
+  border-radius: 9px;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 3px 8px rgba(79, 70, 229, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: all 0.12s ease;
+  cursor: pointer;
+}
+
+.btn-3d-primary:hover {
+  background: linear-gradient(180deg, #4338ca 0%, #3730a3 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(79, 70, 229, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.btn-3d-primary:active {
+  transform: translateY(2px);
+  border-bottom-width: 1.5px;
+  box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2);
+}
+
+.btn-3d-secondary {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #cbd5e1;
+  border-bottom: 2.5px solid #94a3b8;
+  border-radius: 8px;
+  color: #1e293b;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), inset 0 1px 0 #ffffff;
+  transition: all 0.12s ease;
+  cursor: pointer;
+}
+
+.btn-3d-secondary:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  border-bottom-color: #64748b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(15, 23, 42, 0.08), inset 0 1px 0 #ffffff;
+}
+
+.btn-3d-secondary:active {
+  transform: translateY(1.5px);
+  border-bottom-width: 1px;
+  box-shadow: 0 1px 1px rgba(15, 23, 42, 0.05);
+}
+
+/* 3D KPI Tiles */
+.kpi-3d {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-bottom: 3.5px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04), inset 0 1px 0 #ffffff;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kpi-3d:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px -2px rgba(15, 23, 42, 0.08), inset 0 1px 0 #ffffff;
+}
+
+/* ==========================================================================
+   OUTPUT SECTION - DARK THEME WORKSTATION / TERMINAL
+   ========================================================================== */
+
+.dark-terminal-station {
+  background: #090d16;
+  border: 1px solid #1e293b;
+  border-bottom: 3.5px solid #020617;
+  border-radius: 16px;
+  box-shadow:
+    0 10px 30px -5px rgba(0, 0, 0, 0.4),
+    0 25px 50px -12px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+/* Dark Terminal Header & Tabs Bar */
+.dark-terminal-header {
+  background: #0d1322;
+  border-bottom: 1px solid #1e293b;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Dark Tabs for Output Deliverables */
+.dark-tab-btn {
+  background: #090d16;
+  border: 1px solid #1e293b;
+  border-bottom: none;
+  color: #94a3b8;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  position: relative;
+}
+
+.dark-tab-btn:hover {
+  background: #131c31;
+  color: #e2e8f0;
+}
+
+.dark-tab-btn.active {
+  background: #111827;
+  color: #ffffff;
+  border-color: #3b82f6;
+  border-bottom: 2px solid #3b82f6;
+  box-shadow: inset 0 2px 0 #3b82f6, 0 -2px 8px rgba(59, 130, 246, 0.2);
+}
+
+/* Dark Terminal Action Buttons */
+.btn-dark-glass {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid #334155;
+  border-bottom: 2px solid #1e293b;
+  color: #e2e8f0;
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: all 0.12s ease;
+  cursor: pointer;
+}
+
+.btn-dark-glass:hover {
+  background: #1e293b;
+  color: #ffffff;
+  border-color: #475569;
+  transform: translateY(-1px);
+}
+
+.btn-dark-glass:active {
+  transform: translateY(1px);
+  border-bottom-width: 1px;
+}
+
+.btn-dark-glow {
+  background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
+  border: 1px solid #6366f1;
+  border-bottom: 2.5px solid #312e81;
+  color: #ffffff;
+  border-radius: 7px;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: all 0.12s ease;
+  cursor: pointer;
+}
+
+.btn-dark-glow:hover {
+  background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-dark-glow:active {
+  transform: translateY(1.5px);
+  border-bottom-width: 1px;
+}
+
+/* ==========================================================================
+   CODE & DAT VIEWER - DARK THEME WITH NORMAL LINE HEIGHT
+   ========================================================================== */
+
+.dat-viewer-dark {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.8125rem;
+  background: #090d16;
+  color: #e2e8f0;
+  padding: 8px 12px;
+}
+
+.dat-row {
+  display: flex;
+  align-items: baseline;
+  padding: 1px 0;
+  line-height: 1.4;
+  border-radius: 2px;
+}
+
+.dat-row:hover {
+  background-color: rgba(30, 41, 59, 0.45);
+}
+
+.dat-linenum {
+  width: 3.25rem;
+  flex-shrink: 0;
+  text-align: right;
+  padding-right: 0.85rem;
+  color: #475569;
+  user-select: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-right: 1px solid #1e293b;
+  margin-right: 0.75rem;
+}
+
+.dat-content {
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* Dark Theme Syntax Highlighting */
+.dat-content-metadata {
+  color: #38bdf8;
+  font-weight: 600;
+  background: rgba(14, 165, 233, 0.08);
+  border-left: 3px solid #0284c7;
+  padding-left: 6px;
+  border-radius: 2px;
+}
+
+.dat-content-merge {
+  color: #34d399;
+  padding-left: 9px;
+}
+
+/* ==========================================================================
+   DARK THEME TABLES (For CSV and Excel previews in Output Section)
+   ========================================================================== */
+
+.dark-table-container {
+  overflow-x: auto;
+  background: #090d16;
+  max-height: 540px;
+}
+
+.dark-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  text-align: left;
+}
+
+.dark-table th {
+  background: #111827;
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 12px;
+  border-bottom: 2px solid #1e293b;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+.dark-table td {
+  padding: 7px 12px;
+  border-bottom: 1px solid #1e293b/60;
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+
+.dark-table tr:hover td {
+  background-color: rgba(30, 41, 59, 0.4);
+}
+
+/* ==========================================================================
+   LIGHT DATA TABLES (For spreadsheet data grid in Upload tab)
+   ========================================================================== */
+
+.data-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.data-table td {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.data-table tr:hover td {
+  background-color: #f8fafc;
+}
+
+/* Live Pulse Animation */
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.15);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0);
+  }
+}
+
+.live-dot {
+  animation: pulse-dot 2.2s infinite ease-in-out;
+}
+
+/* Toast Notifications */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  min-width: 310px;
+  max-width: 480px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  border-bottom: 2.5px solid #94a3b8;
+  box-shadow: 0 8px 24px -2px rgba(15, 23, 42, 0.12);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toastSlide 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  background: #ffffff;
+}
+
+@keyframes toastSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
