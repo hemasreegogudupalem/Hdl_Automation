@@ -15,6 +15,7 @@ from mysql.connector import Error
 # Import unmodified backend modules
 from src.dat_generator import generate_hdl_bundle
 from src.excel_reader import read_excel
+from src.contact_generator import generate_contact_dat
 from src.field_mapper import (
     build_alias_index,
     load_field_mappings,
@@ -569,6 +570,21 @@ def list_reports_and_outputs(output_dir: str = "output", reports_dir: str = "rep
             })
 
     reports = []
+    contact_output_file = None
+    if template["template_name"].casefold() == "worker":
+        invalid_rows = {
+            error["ExcelRow"] - 2
+            for error in validation_errors
+            if "ExcelRow" in error
+        }
+        valid_rows = df.iloc[
+            [index for index in range(len(df)) if index not in invalid_rows]
+        ]
+        contact_output_file = generate_contact_dat(
+            valid_rows,
+            generation_values["source_system_owner"],
+            out_dir_path,
+        )
     if rep_path.exists():
         for f in rep_path.glob("*.*"):
             if f.suffix.lower() in (".xlsx", ".csv", ".json"):
@@ -593,6 +609,10 @@ def read_full_dat_file(filename: str, output_dir: str = "output", max_lines: int
         raise FileNotFoundError(f"File {filename} not found in {output_dir}")
 
     lines = []
+        "contact_output_file": (
+            str(contact_output_file.as_posix())
+            if contact_output_file else None
+        ),
     metadata_count = 0
     merge_count = 0
     with file_path.open("r", encoding="utf-8") as f:

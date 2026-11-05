@@ -689,6 +689,7 @@ function renderFilteredMappings() {
     const typeBadgeClass =
       m.mapping_type === 'DIRECT' ? 'bg-blue-100 text-blue-800 border-blue-200' :
       m.mapping_type === 'GENERATED' ? 'bg-indigo-100 text-indigo-800 border-indigo-200' :
+      m.mapping_type === 'DERIVED' ? 'bg-amber-100 text-amber-800 border-amber-200' :
       m.mapping_type === 'DEFAULT' ? 'bg-purple-100 text-purple-800 border-purple-200' :
       'bg-slate-100 text-slate-600 border-slate-200';
 

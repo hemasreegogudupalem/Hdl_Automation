@@ -7,6 +7,7 @@ import pandas as pd
 from mysql.connector import Error
 
 from src.dat_generator import generate_hdl_bundle
+from src.contact_generator import generate_contact_dat
 from src.excel_reader import read_excel
 from src.field_mapper import (
     build_alias_index,
@@ -353,6 +354,122 @@ def _source_column_for_field(field_name, normalized_columns, alias_index):
 
 def _make_mapping_lookup(objects, normalized_columns, alias_index=None):
     lookup = {}
+def _contact_mapping_for_field(
+    object_name,
+    field_name,
+    normalized_columns,
+    field,
+):
+    source_groups = {
+        ("Contact", "EffectiveStartDate"): (
+            "Start Date", "Date of Joining", "Effective Start Date",
+        ),
+        ("Contact", "StartDate"): ("Start Date", "Date of Joining"),
+        ("ContactLegislativeData", "EffectiveStartDate"): (
+            "Start Date", "Date of Joining", "Effective Start Date",
+        ),
+        ("ContactLegislativeData", "LegislationCode"): ("Nationality",),
+        ("ContactName", "EffectiveStartDate"): (
+            "Start Date", "Date of Joining", "Effective Start Date",
+        ),
+        ("ContactName", "LegislationCode"): ("Nationality",),
+        ("ContactName", "FirstName"): (
+            "Father Name", "Mother Name", "Spouse", "Spouse Name",
+        ),
+        ("ContactName", "MiddleNames"): (
+            "Father Name", "Mother Name", "Spouse", "Spouse Name",
+        ),
+        ("ContactName", "LastName"): (
+            "Father Name", "Mother Name", "Spouse", "Spouse Name",
+        ),
+        ("ContactRelationship", "RelatedPersonNumber"): (
+            "Person Number", "Employee Number", "Employee ID",
+        ),
+        ("ContactRelationship", "EffectiveStartDate"): (
+            "Start Date", "Date of Joining", "Effective Start Date",
+        ),
+        ("ContactRelationship", "ContactType"): (
+            "Father Name", "Mother Name", "Spouse", "Spouse Name",
+        ),
+        ("ContactRelationship", "StatutoryDependent"): (
+            "Father Name", "Mother Name", "Spouse", "Spouse Name",
+        ),
+        ("ContactRelationship", "EmergencyContactFlag"): (
+            "Father Name", "Mother Name", "Spouse", "Spouse Name",
+        ),
+        ("ContactRelationship", "PersonalFlag"): (
+            "Father Name", "Mother Name", "Spouse", "Spouse Name",
+        ),
+        ("ContactRelationship", "PrimaryContactFlag"): (
+            "Father Name", "Mother Name", "Spouse", "Spouse Name",
+        ),
+        ("ContactRelationship", "LegislationCode"): ("Nationality",),
+        ("ContactAddress", "EffectiveStartDate"): (
+            "Start Date", "Date of Joining", "Effective Start Date",
+        ),
+        ("ContactAddress", "AddressLine1"): (
+            "Father Address", "Mother Address", "Spouse Address",
+            "Home Address", "Address",
+        ),
+        ("ContactAddress", "TownOrCity"): (
+            "Town / City", "TownOrCity", "City",
+        ),
+        ("ContactAddress", "Country"): ("Nationality", "Country"),
+        ("ContactEmail", "DateFrom"): (
+            "Start Date", "Date of Joining", "Effective Start Date",
+        ),
+        ("ContactEmail", "EmailAddress"): (
+            "Father Email", "Mother Email", "Spouse Email",
+        ),
+    }
+    key = (object_name, field_name)
+    if key not in source_groups:
+        return None
+
+    source_columns = [
+        normalized_columns[normalize_column_name(source)]
+        for source in source_groups[key]
+        if normalize_column_name(source) in normalized_columns
+    ]
+    if source_columns:
+        return {
+            "field_name": field_name,
+            "excel_column": " / ".join(source_columns),
+            "mapping_type": (
+                "DIRECT" if len(source_columns) == 1
+                and key not in {
+                    ("ContactName", "FirstName"),
+                    ("ContactName", "MiddleNames"),
+                    ("ContactName", "LastName"),
+                    ("ContactRelationship", "ContactType"),
+                    ("ContactRelationship", "StatutoryDependent"),
+                    ("ContactRelationship", "EmergencyContactFlag"),
+                    ("ContactRelationship", "PersonalFlag"),
+                    ("ContactRelationship", "PrimaryContactFlag"),
+                }
+                else "DERIVED"
+            ),
+            "required": field.get("required_flag"),
+        }
+
+    defaults = {
+        ("ContactName", "NameType"): "GLOBAL",
+        ("ContactRelationship", "SequenceNumber"): "1",
+        ("ContactAddress", "AddressType"): "HOME",
+        ("ContactAddress", "PrimaryFlag"): "Y",
+        ("ContactEmail", "EmailType"): "H1",
+        ("ContactEmail", "PrimaryFlag"): "Y",
+    }
+    if key in defaults:
+        return {
+            "field_name": field_name,
+            "mapping_type": "DEFAULT",
+            "default_value": defaults[key],
+            "required": field.get("required_flag"),
+        }
+    return None
+
+
     report = []
 
     for obj in objects:
@@ -451,33 +568,44 @@ def _make_mapping_lookup(objects, normalized_columns, alias_index=None):
 
             mapping = matches[0] if matches else None
             if mapping is None:
-                source_column = _source_column_for_field(
+                job_code_column = (
+                    _source_column_for_field(
+                        field_name,
+                        normalized_columns,
+                        alias_index,
+                    )
+                    if obj["object_name"] == "Job"
+                    and field_name == "JobCode"
+                    else None
+                )
+                job_code_is_derived = not job_code_column
+                if job_code_is_derived and (
+                    obj["object_name"] == "Job"
+                    and field_name == "JobCode"
+                ):
+                    job_code_column = _source_column_for_field(
+                        "Name",
+                        normalized_columns,
+                        alias_index,
+                    )
+                contact_mapping = _contact_mapping_for_field(
+                    obj["object_name"],
                     field_name,
                     normalized_columns,
-                    alias_index,
+                    field,
                 )
-                if source_column:
+                if job_code_column:
                     mapping = {
                         "field_name": field_name,
-                        "excel_column": source_column,
-                        "mapping_type": "DIRECT",
+                        "excel_column": job_code_column,
+                        "mapping_type": (
+                            "DERIVED" if job_code_is_derived else "DIRECT"
+                        ),
                         "required": field.get("required_flag"),
                     }
-                elif field_name in DEFAULT_FIELD_VALUES:
-                    mapping = {
-                        "field_name": field_name,
-                        "mapping_type": "DEFAULT",
-                        "default_value": DEFAULT_FIELD_VALUES[field_name],
-                        "required": field.get("required_flag"),
-                    }
-                elif field_name in {
-                    "Country",
-                    "LegislationCode",
-                    "NationalIdentifierType",
-                    "SourceSystemOwner",
-                    "SourceSystemId",
-                    "AssignmentNumber",
-                }:
+                elif contact_mapping:
+                    mapping = contact_mapping
+                elif _is_required(field.get("generated_field")):
                     mapping = {
                         "field_name": field_name,
                         "mapping_type": "GENERATED",
@@ -490,6 +618,39 @@ def _make_mapping_lookup(objects, normalized_columns, alias_index=None):
             if (
                 mapping is None
                 and is_output_field
+                else:
+                    source_column = _source_column_for_field(
+                        field_name,
+                        normalized_columns,
+                        alias_index,
+                    )
+                    if source_column:
+                        mapping = {
+                            "field_name": field_name,
+                            "excel_column": source_column,
+                            "mapping_type": "DIRECT",
+                            "required": field.get("required_flag"),
+                        }
+                    elif field_name in DEFAULT_FIELD_VALUES:
+                        mapping = {
+                            "field_name": field_name,
+                            "mapping_type": "DEFAULT",
+                            "default_value": DEFAULT_FIELD_VALUES[field_name],
+                            "required": field.get("required_flag"),
+                        }
+                    elif field_name in {
+                        "Country",
+                        "LegislationCode",
+                        "NationalIdentifierType",
+                        "SourceSystemOwner",
+                        "SourceSystemId",
+                        "AssignmentNumber",
+                    }:
+                        mapping = {
+                            "field_name": field_name,
+                            "mapping_type": "GENERATED",
+                            "required": field.get("required_flag"),
+                        }
                 and _is_required(field.get("required_flag"))
             ):
                 raise ValueError(
@@ -1011,6 +1172,22 @@ def main():
 
     generated_rows = len(output_objects[0]["records"]) if output_objects else 0
     print("\n========== HDL AUTOMATION SUMMARY ==========")
+    if template["template_name"].casefold() == "worker":
+        invalid_rows = {
+            error["ExcelRow"] - 2
+            for error in validation_errors
+            if "ExcelRow" in error
+        }
+        valid_rows = df.iloc[
+            [index for index in range(len(df)) if index not in invalid_rows]
+        ]
+        contact_file = generate_contact_dat(
+            valid_rows,
+            generation_values["source_system_owner"],
+            args.output_dir,
+        )
+        print(f"Contact output file: {contact_file}")
+
     print(f"Excel rows read: {len(df)}")
     print(f"Rows generated in each HDL object: {generated_rows}")
     skipped_rows = len({
